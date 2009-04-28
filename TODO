@@ -1,0 +1,6 @@
+Things to do for the pyana module
+=================================
+
+* Should this be a proper numpy sub-package/sub-module?
+* Fix/clean errors returned by anarw.c
+* Document pyana.py functions

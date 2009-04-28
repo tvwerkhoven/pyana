@@ -1,0 +1,4 @@
+recursive-include src *
+recursive-include pyana *
+include TODO
+include README

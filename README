@@ -1,0 +1,54 @@
+PyAna - A Python module for ANA f0 file IO
+==========================================
+
+This is PyAna, a Python module to perform file input and output operations
+with the ANA f0 file format, originally developed by Robert Shine. This module
+is mostly a wrapper around the slightly modified code of the IDL DLM library 
+by Michiel van Noort. This library in turn borrows code from the old ANA 
+routines.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Installation
+============
+
+This module can be installed using the standard NumPy distutils. Therefore,
+simply running
+
+   python setup.py install
+
+will install this module to the default installation location. Running
+
+   python setup.py
+
+will start an interactive installation process providing 
+
+Version history
+===============
+
+20090422, v0.3.3:
+   * Made errors a little nicer to read & more understandable. 
+   * Added pyana.writeto() wrapper for fzwrite, similar to pyfits.
+
+20090331, v0.3.2:
+   * Updated segfault fix in anadecrunch(). Illegal read beyond memory 
+     allocation can be as much as 4 bytes in the worst case in 32-bit 
+     decrunching (although this is rarely used).
+
+20090327, v0.3.1:
+   * Fixed a segfault error in anadecrunch(). Problem was pre-caching of a few 
+     bytes of compressed data, however the malloc() used for the compressed 
+     data did not have those few bytes extra, causing a 1 or 2 byte illegal 
+     read. Normally this shouldn't be a problem, but sometimes (like when I 
+     needed it) it is.
+
+20090326, v0.3.0:
+   * Old code had memory leaks, trying Michiel van Noort's improved code from 
+     libf0, the IDL DLM library. Hopefully this works better.
+   * Renamed functions to correspond with the (original) IDL functions.
+     load() -> fzread() and save() -> fzwrite(). Parameters still the same.
+
+20090218, v0.2.2:
+   * Added file exists check before calling _pyana.load C-routine
