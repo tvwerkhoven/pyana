@@ -3,7 +3,7 @@
 """
 setup.py -- setup file for the pyana module
 
-Created by Tim van Werkhoven on 2009-02-11.
+Created by Tim van Werkhoven (t.i.m.vanwerkhoven@xs4all.nl) on 2009-02-11.
 Copyright (c) 2009 Tim van Werkhoven. All rights reserved.
 """
 import sys
