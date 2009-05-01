@@ -23,7 +23,7 @@ will install this module to the default installation location. Running
 
    python setup.py
 
-will start an interactive installation process providing 
+will start an interactive installation process.
 
 Version history
 ===============
