@@ -17,7 +17,7 @@ except:
 
 module_pyana = Extension('_pyana',
                     define_macros = [('MAJOR_VERSION', '0'),
-                                     ('MINOR_VERSION', '3')],
+                                     ('MINOR_VERSION', '4')],
                     include_dirs = [numpy.get_include()],
 #                   libraries = [''],
 #                   library_dirs = [''],
@@ -31,7 +31,7 @@ module_pyana = Extension('_pyana',
 								'src/anadecompress.c'])
 
 setup (name = 'pyana',
-	version = '0.3.2',
+	version = '0.4.0',
 	description = 'Python library to read ANA f0 files',
 	author = 'Tim van Werkhoven',
 	author_email = 'tim@astro.su.se',

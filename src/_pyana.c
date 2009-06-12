@@ -79,7 +79,9 @@ static PyObject *pyana_fzread(PyObject *self, PyObject *args) {
 	if (debug == 1) printf("pyana_fzread(): Dimensions: ");
 	for (d=0; d<nd; d++) {
 		if (debug == 1) printf("%d ", ds[d]);
-		npy_dims[d] = ds[d];
+		// ANA stores dimensions the other way around?
+		//npy_dims[d] = ds[d];
+		npy_dims[nd-1-d] = ds[d];
 	}
 	if (debug == 1) printf("\npyana_fzread(): Datasize: %d\n", size);
 	
@@ -151,8 +153,8 @@ static PyObject * pyana_fzwrite(PyObject *self, PyObject *args) {
 	// If header is NULL, then set the comment to a default value
 	if (NULL == header) {
 		if (debug == 1) printf("pyana_fzwrite(): Setting default header\n");
-		struct timeval *tv_time;
-		struct tm *tm_time;
+		struct timeval *tv_time=NULL;
+		struct tm *tm_time=NULL;
 		gettimeofday(tv_time, NULL);
 		tm_time = gmtime(&(tv_time->tv_sec));
 		asprintf(&header, "#%-42s -1  %02d:%02d:%02d.%03d  %d  %d\n", filename, tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec, tv_time->tv_usec/1000);
@@ -209,11 +211,13 @@ static PyObject * pyana_fzwrite(PyObject *self, PyObject *args) {
 	int *dims = malloc(nd*sizeof(int));
 	// Get the dimensions and number of elements
 	npy_intp *npy_dims = PyArray_DIMS(anadata_align);
-	npy_intp npy_nelem = PyArray_SIZE(anadata_align);
+	//npy_intp npy_nelem = PyArray_SIZE(anadata_align);
 	
 	if (debug == 1) printf("pyana_fzwrite(): Dimensions: ");
 	for (d=0; d<nd; d++) {
-		dims[d] = npy_dims[d];
+		// ANA stores dimensions the other way around?
+		//dims[d] = npy_dims[d];
+		dims[d] = npy_dims[nd-1-d];
 		if (debug == 1) printf(" %d", dims[d]);
 	}
 	if (debug == 1) printf("\npyana_fzwrite(): Total is %d-dimensional\n", nd);

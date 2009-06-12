@@ -28,6 +28,10 @@ will start an interactive installation process.
 Version history
 ===============
 
+20090422, v0.4.0:
+   * Fixed dimension problem, ANA and numpy expect dimensions in different 
+     order
+
 20090422, v0.3.3:
    * Made errors a little nicer to read & more understandable. 
    * Added pyana.writeto() wrapper for fzwrite, similar to pyfits.

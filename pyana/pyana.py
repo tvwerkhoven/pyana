@@ -36,7 +36,7 @@ def getdata(filename, debug=0):
 	
 	data = pyana.getdata(filename)
 	"""
-	return (fzread(filename))['data']
+	return (fzread(filename, debug))['data']
 	# data = _pyana.fzread(filename, debug)
 	# return data['data']
 
@@ -49,7 +49,7 @@ def getheader(filename, debug=0):
 	
 	header = pyana.getheader(filename)
 	"""
-	return (fzread(filename))['header']
+	return (fzread(filename, debug))['header']
 	# data = _pyana.fzread(filename, debug)
 	# return data['header']
 
@@ -79,7 +79,7 @@ class pyanaTests(unittest.TestCase):
 		# Create a test image, store it, reread it and compare
 		import numpy as N
 		self.numpy = N
-		self.img_size = (512, 512)
+		self.img_size = (456, 345)
 		self.img_src = N.arange(N.product(self.img_size))
 		self.img_src.shape = self.img_size
 		self.img_i8 = self.img_src*2**8/self.img_src.max()
