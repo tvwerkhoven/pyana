@@ -23,11 +23,12 @@
 void bswapi64(int64_t *x, int n);
 void bswapi32(int32_t *x, int n);
 void bswapi16(int16_t *x, int n);
-int ck_synch_hd(FILE *fin, fzhead_t *fh, int t_endian);
+//int ck_synch_hd(FILE *fin, fzhead_t *fh, int t_endian);
+int ck_synch_hd(int fd, fzhead_t **fh, int t_endian);
 
 // Ana I/O routines
 char *ana_fzhead(char *file_name); // fzhead subroutine	
-uint8_t *ana_fzread(char *file_name, int **ds, int *nd, char **header, int *type, int *osz); // fzread subroutine
+uint8_t *ana_fzread(char *file_name, int **ds, int *nd, char **header, int *type, int *osz,int *err); // fzread subroutine
 void ana_fzwrite(uint8_t *data, char *file_name, int *ds, int nd, char *header, int py_type);	/* fcwrite subroutine */
 void ana_fcwrite(uint8_t *data, char *file_name, int *ds, int nd, char *header, int py_type, int slice);	/* fcwrite subroutine */
 

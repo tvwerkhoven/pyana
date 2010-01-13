@@ -16,9 +16,9 @@ import _pyana
 
 ## Functions for loading in ANA files
 
-def fzread(filename, debug=0):
+def fzread(filename, debug=0, strict=0):
 	"""
-	Load an ANA file and return the data, size, dimensions and comments in a
+	Load an ANA file and return the data, size, dimensions and header in a
 	dict.
 	
 	data = pyana.load(filename)
@@ -26,7 +26,7 @@ def fzread(filename, debug=0):
 	if not os.path.isfile(filename):
 		raise IOError("File does not exist!")
 	
-	data = _pyana.fzread(filename, debug)
+	data = _pyana.fzread(filename, debug, strict)
 	return data
 
 
@@ -45,7 +45,7 @@ def getheader(filename, debug=0):
 	"""
 	Load an ANA file and only return the header consisting of the dimensions,
 	size (defined as the product of all dimensions times the size of the
-	datatype, this not relying on actual filesize) and comments.
+	datatype, this not relying on actual filesize) and header.
 	
 	header = pyana.getheader(filename)
 	"""
@@ -54,23 +54,23 @@ def getheader(filename, debug=0):
 	# return data['header']
 
 ## Functions for storing ANA files
-def fzwrite(filename, data, compress=1, comments=False, debug=0):
+def fzwrite(filename, data, compress=1, header=False, debug=0, bslice=5):
 	"""
 	Save a 2d numpy array as an ANA file and return the bytes written, or NULL
 	
-	written = pyana.fzwrite(filename, data, compress=1, comments=False)
+	written = pyana.fzwrite(filename, data, compress=1, header=False, bslice=5)
 	"""
-	if (comments):
-		return _pyana.fzwrite(filename, data, compress, comments, debug)
+	if (header):
+		return _pyana.fzwrite(filename, data, compress, header, debug, bslice)
 	else:
-		return _pyana.fzwrite(filename, data, compress, '', debug)
+		return _pyana.fzwrite(filename, data, compress, '', debug, bslice)
 
 
-def writeto(filename, data, compress=1, comments=False, debug=0):
+def writeto(filename, data, compress=1, header=False, debug=0):
 	"""
 	Similar as pyana.fzwrite().
 	"""
-	return fzwrite(filename, data, compress, comments, debug)
+	return fzwrite(filename, data, compress, header, debug)
 
 
 ## Selftesting using unittest starts below this line

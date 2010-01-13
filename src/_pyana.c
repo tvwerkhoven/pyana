@@ -29,12 +29,54 @@ static PyMethodDef PyanaMethods[] = {
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
+typedef struct {
+  PyObject_HEAD
+  void *memory;
+}_MyDeallocObject;
+
+static void _mydealloc_dealloc(_MyDeallocObject *self)
+{
+  fprintf(stderr,"_mydealloc_dealloc: freeing 0x%016lX\n",(unsigned long)self->memory);
+  free(self->memory);
+  self->ob_type->tp_free((PyObject *)self);
+}
+
+static PyTypeObject _myDeallocType={
+  PyObject_HEAD_INIT(NULL)
+  0,                                    /*ob_size*/
+  "mydeallocator",                      /*tp_name*/
+  sizeof(_MyDeallocObject),             /*tp_basicsize*/
+  0,                                    /*tp_itemsize*/
+  (destructor)_mydealloc_dealloc,                   /*tp_dealloc*/
+  0,                                    /*tp_print*/
+  0,			                /*tp_getattr*/
+  0,			                /*tp_setattr*/
+  0,			                /*tp_compare*/
+  0,                                    /*tp_repr*/
+  0,			                /*tp_as_number*/
+  0,			                /*tp_as_sequence*/
+  0,			                /*tp_as_mapping*/
+  0,			                /*tp_hash */
+  0,			                /*tp_call*/
+  0,			                /*tp_str*/
+  0,			                /*tp_getattro*/
+  0,                                    /*tp_setattro*/
+  0,                                    /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,                   /*tp_flags*/
+  "pyana internal deallocator object",  /* tp_doc */
+};
+
+
 
 // Init module methods
-PyMODINIT_FUNC init_pyana(void) {
+PyMODINIT_FUNC init_pyana(void)
+{
     (void) Py_InitModule("_pyana", PyanaMethods);
-	// Init numpy usage
-	import_array();
+  import_array(); // Init numpy usage
+
+// init deallocator
+  _myDeallocType.tp_new=PyType_GenericNew;
+  if(PyType_Ready(&_myDeallocType)<0) return;
 }
 
 /* 
@@ -42,32 +84,42 @@ PyMODINIT_FUNC init_pyana(void) {
 @param [in] filename
 @return [out] data, NULL on failure
 */
-static PyObject *pyana_fzread(PyObject *self, PyObject *args) {
-	// Function arguments
+static PyObject *pyana_fzread(PyObject *self, PyObject *args)
+{ // Function arguments
 	char *filename;
-	int debug=0;
+  int debug=0,strict=0,err=0;
 	// Init ANA IO variables
 	char *header = NULL;			// ANA header (comments)
 	uint8_t *anaraw = NULL;			// Raw data
-	int	nd=-1, type=-1, *ds, size=-1, d; // Various properties
+  int	nd=-1, type=-1, *ds = NULL, size=-1, d; // Various properties
 	// Data manipulation
 	PyArrayObject *anadata;			// Final ndarray
 	
 	// Parse arguments
-	if (!PyArg_ParseTuple(args, "s|i", &filename, &debug)) {
-		return NULL;
-	}
+  if (!PyArg_ParseTuple(args, "s|i|i", &filename, &debug, &strict)) return NULL;
 	
 	// Read ANA file
 	if (debug == 1) printf("pyana_fzread(): Reading in ANA file\n");
-	anaraw = ana_fzread(filename, &ds, &nd, &header, &type, &size);
+  anaraw = ana_fzread(filename, &ds, &nd, &header, &type, &size, &err);
 		
+  if (strict && err) {
+	 PyErr_SetString(PyExc_ValueError, "In pyana_fzread: error occured during file read.");
+	 if(anaraw!=NULL) free(anaraw);
+	 if(ds!=NULL) free(ds);
+	 if(header!=NULL) free(header);
+	 return NULL;
+  }
 	if (NULL == anaraw) {
 		PyErr_SetString(PyExc_ValueError, "In pyana_fzread: could not read ana file, data returned is NULL.");
+	 if(ds!=NULL) free(ds);
+	 if(header!=NULL) free(header);
 		return NULL;
 	}
 	if (type == -1) {
 		PyErr_SetString(PyExc_ValueError, "In pyana_fzread: could not read ana file, type invalid.");
+	 if(anaraw!=NULL) free(anaraw);
+	 if(ds!=NULL) free(ds);
+	 if(header!=NULL) free(header);
 		return NULL;
 	}
 	
@@ -95,28 +147,56 @@ static PyObject *pyana_fzread(PyObject *self, PyObject *args) {
 		case (INT64): npy_type = PyArray_INT64; break;
 		default: 
 			PyErr_SetString(PyExc_ValueError, "In pyana_fzread: datatype of ana file unknown/unsupported.");
+		 if(anaraw!=NULL) free(anaraw);
+		 if(ds!=NULL) free(ds);
+		 if(header!=NULL) free(header);
 			return NULL;
 	}
 	if (debug == 1) printf("pyana_fzread(): Read %d bytes, %d dimensions\n", size, nd);
-	
 	// Create numpy array from the data 
-	anadata = (PyArrayObject*) PyArray_SimpleNewFromData(nd, npy_dims,
-		npy_type, (void *) anaraw);
+  if((anadata=(PyArrayObject*)PyArray_SimpleNewFromData(nd,npy_dims,npy_type,(void*)anaraw))==NULL){
+    if(anaraw) free(anaraw);
+    if(ds) free(ds);
+    if(header) free(header);
+    Py_XDECREF(anadata);
+    return NULL;
+  }
 	// Make sure Python owns the data, so it will free the data after use
-	PyArray_FLAGS(anadata) |= NPY_OWNDATA;
-	
+#if 1
+  PyArray_FLAGS(anadata) |= NPY_OWNDATA; // FIXME: this does not do the job...?
 	if (!PyArray_CHKFLAGS(anadata, NPY_OWNDATA)) {
 		PyErr_SetString(PyExc_RuntimeError, "In pyana_fzread: unable to own the data, will cause memory leak. Aborting");
+    if(ds!=NULL) free(ds);
+    if(header!=NULL) free(header);
+    return NULL;
+  }
+#else // alternative "manual" memory management
+// avoid memory leak: attach base object
+  PyObject *newobj=(PyObject*)PyObject_NEW(_MyDeallocObject,&_myDeallocType);
+  if(newobj == NULL){
+     if(anaraw) free(anaraw);
+     if(ds) free(ds);
+     if(header) free(header);
+     Py_XDECREF(anadata);
 		return NULL;
 	}
 	
+  ((_MyDeallocObject *)newobj)->memory=anaraw;
+  fprintf(stderr,"allocating: 0x%016lX\n",anaraw);
+  PyArray_BASE(anadata)=newobj;
+#endif
 	// Return the data in a dict with some metainfo attached
 	// NB: Use 'N' for PyArrayObject s, because when using 'O' it will create 
 	// another reference count such that the memory will never be deallocated.
 	// See:
 	// http://www.mail-archive.com/numpy-discussion@scipy.org/msg13354.html 
 	// ([Numpy-discussion] numpy CAPI questions)
-	return Py_BuildValue("{s:N,s:{s:i,s:(ii),s:s}}", "data", anadata, "header", "size", size, "dims", ds[0], ds[1], "header", header);
+  PyObject *P=Py_BuildValue("{s:N,s:{s:i,s:(ii),s:s}}", "data", anadata, "header", "size", size, "dims", ds[0], ds[1], "header", header);
+//
+//  if(ds!=NULL) free(ds);
+//  if(header!=NULL) free(header);
+//
+  return P;
 }
 
 
@@ -128,12 +208,12 @@ static PyObject *pyana_fzread(PyObject *self, PyObject *args) {
 @param [in] header (optional)
 @return number of bytes read on success, NULL pointer on failure
 */
-static PyObject * pyana_fzwrite(PyObject *self, PyObject *args) {
-	// Python function arguments
+static PyObject * pyana_fzwrite(PyObject *self, PyObject *args) { // Python function arguments
 	char *filename = NULL;
 	PyArrayObject *anadata;
-	int compress = 1, debug=0;
+	int compress = 1, debug=0,bslice=5;
 	char *header = NULL;
+	int headalloc=0;
 	// Processed data goes here
 	PyObject *anadata_align;
 	uint8_t *anadata_bytes;
@@ -141,8 +221,8 @@ static PyObject * pyana_fzwrite(PyObject *self, PyObject *args) {
 	int	type, d;
 	
 	// Parse arguments from Python function
-    if (!PyArg_ParseTuple(args, "sO!|isi", &filename, &PyArray_Type, &anadata, &compress, &header, &debug))
-        return NULL;
+
+        if (!PyArg_ParseTuple(args, "sO!|isii", &filename, &PyArray_Type, &anadata, &compress,&header, &debug,&bslice)) return NULL;
 	
 	// Check if filename was parsed correctly (should be, otherwise
 	// PyArg_ParseTuple should have raised an error, obsolete?)
@@ -157,7 +237,8 @@ static PyObject * pyana_fzwrite(PyObject *self, PyObject *args) {
 		struct tm *tm_time=NULL;
 		gettimeofday(tv_time, NULL);
 		tm_time = gmtime(&(tv_time->tv_sec));
-		asprintf(&header, "#%-42s -1  %02d:%02d:%02d.%03d  %d  %d\n", filename, tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec, tv_time->tv_usec/1000);
+		headalloc=1;
+		asprintf(&header, "#%-42s -1  %02d:%02d:%02d.%03d\n", filename, tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec, (int)(tv_time->tv_usec/1000));
 	}
 	if (debug == 1) printf("pyana_fzwrite(): Header: '%s'\n", header);
 	
@@ -174,6 +255,11 @@ static PyObject * pyana_fzwrite(PyObject *self, PyObject *args) {
 			if (debug == 1) 
 				printf("pyana_fzwrite(): Found type PyArray_INT16\n");
 			break;
+		case (PyArray_INT32):
+			type = INT32;
+			if (debug == 1)
+				printf("pyana_fzwrite(): Found type PyArray_INT32\n");
+			break;
 		case (PyArray_FLOAT32): 
 			type = FLOAT32; 
 			if (debug == 1) 
@@ -187,12 +273,13 @@ static PyObject * pyana_fzwrite(PyObject *self, PyObject *args) {
 		//case (PyArray_INT64): type = INT64; break;
 		default:
 			PyErr_SetString(PyExc_ValueError, "In pyana_fzwrite: datatype cannot be stored as ANA file.");
+                        if(headalloc) free(header);
 			return NULL;
-			break;
 	}
 	// Check if compression flag is sane
 	if (compress == 1 && (type == FLOAT32 || type == FLOAT64)) {
 		PyErr_SetString(PyExc_RuntimeError, "In pyana_fzwrite: datatype requested cannot be compressed.");
+                if(headalloc) free(header);
 		return NULL;
 	}
 	if (debug == 1) printf("pyana_fzwrite(): pyarray datatype is %d, ana datatype is %d\n", PyArray_TYPE((PyObject *) anadata), type);
@@ -201,10 +288,14 @@ static PyObject * pyana_fzwrite(PyObject *self, PyObject *args) {
 	// Sanitize data, make a new array from the old array and force the
 	// NPY_CARRAY_RO requirement which ensures a C-contiguous and aligned
 	// array will be made
-	anadata_align = PyArray_FromArray(anadata, PyArray_DESCR((PyObject *) anadata), NPY_CARRAY_RO);
+	// Increase reference count to the type descriptor as it is "stolen" by PyArray_FromArray
+	// WARNING: anadata_align still holds a reference to anadata and must be unreferenced when we're done
+        Py_INCREF(((PyArrayObject*)anadata)->descr);
+	anadata_align=PyArray_FromArray(anadata,((PyArrayObject*)anadata)->descr,NPY_CARRAY_RO);
 	
 	// Get a pointer to the aligned data
 	anadata_bytes = (uint8_t *) PyArray_BYTES(anadata_align);
+
 	// Get the number of dimensions
 	PyArrayObject *arrobj = (PyArrayObject*) anadata_align;
 	int nd = arrobj->nd;
@@ -225,11 +316,13 @@ static PyObject * pyana_fzwrite(PyObject *self, PyObject *args) {
 	// Write ANA file
 	if (debug == 1) printf("pyana_fzwrite(): Compress: %d\n", compress);
 	if (compress == 1)
-		ana_fcwrite(anadata_bytes, filename, dims, nd, header, type, 5);	
+		ana_fcwrite(anadata_bytes, filename, dims, nd, header, type, bslice);
 	else
 		ana_fzwrite(anadata_bytes, filename, dims, nd, header, type);
 	
 	free(dims);
 	// If we didn't crash up to here, we're probably ok :P
+        if(headalloc) free(header);
+        Py_DECREF(anadata_align); // Release anadata_align
 	return Py_BuildValue("i", 1);
 }

@@ -28,6 +28,9 @@ will start an interactive installation process.
 Version history
 ===============
 
+20100113, v0.4.0-kva:
+   * Applied KVA improvements, breaks BSD compatibility
+
 20090422, v0.4.0:
    * Fixed dimension problem, ANA and numpy expect dimensions in different 
      order

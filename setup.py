@@ -31,7 +31,7 @@ module_pyana = Extension('_pyana',
 								'src/anadecompress.c'])
 
 setup (name = 'pyana',
-	version = '0.4.0',
+	version = '0.4.0-kva',
 	description = 'Python library to read ANA f0 files',
 	author = 'Tim van Werkhoven',
 	author_email = 'tim@astro.su.se',
