@@ -157,7 +157,10 @@ static PyObject * pyana_fzwrite(PyObject *self, PyObject *args) {
 		struct tm *tm_time=NULL;
 		gettimeofday(tv_time, NULL);
 		tm_time = gmtime(&(tv_time->tv_sec));
-		asprintf(&header, "#%-42s -1  %02d:%02d:%02d.%03d  %d  %d\n", filename, tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec, tv_time->tv_usec/1000);
+		asprintf(&header, "#%-42s compress=%d date=%02d:%02d:%02d.%03ld\n",
+			filename, 
+			compress, 
+			tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec, (long) (tv_time->tv_usec/1000));
 	}
 	if (debug == 1) printf("pyana_fzwrite(): Header: '%s'\n", header);
 	
