@@ -57,7 +57,8 @@ static PyObject *pyana_fzread(PyObject *self, PyObject *args) {
 	}
 	
 	// Read ANA file
-	if (debug == 1) printf("pyana_fzread(): Reading in ANA file\n");
+	if (debug == 1)
+		printf("pyana_fzread(): Reading in ANA file\n");
 	anaraw = ana_fzread(filename, &ds, &nd, &header, &type, &size);
 		
 	if (NULL == anaraw) {
@@ -74,14 +75,17 @@ static PyObject *pyana_fzread(PyObject *self, PyObject *args) {
 	int npy_type;					// Numpy datatype
 	
 	// Calculate total datasize
-	if (debug == 1) printf("pyana_fzread(): Dimensions: ");
+	if (debug == 1)
+		printf("pyana_fzread(): Dimensions: ");
 	for (d=0; d<nd; d++) {
-		if (debug == 1) printf("%d ", ds[d]);
+		if (debug == 1)
+			printf("%d ", ds[d]);
 		// ANA stores dimensions the other way around?
 		//npy_dims[d] = ds[d];
 		npy_dims[nd-1-d] = ds[d];
 	}
-	if (debug == 1) printf("\npyana_fzread(): Datasize: %d\n", size);
+	if (debug == 1)
+		printf("\npyana_fzread(): Datasize: %d\n", size);
 	
 	// Convert datatype from ANA type to PyArray type
 	switch (type) {
@@ -95,7 +99,8 @@ static PyObject *pyana_fzread(PyObject *self, PyObject *args) {
 			PyErr_SetString(PyExc_ValueError, "In pyana_fzread: datatype of ana file unknown/unsupported.");
 			return NULL;
 	}
-	if (debug == 1) printf("pyana_fzread(): Read %d bytes, %d dimensions\n", size, nd);
+	if (debug == 1)
+		printf("pyana_fzread(): Read %d bytes, %d dimensions\n", size, nd);
 	
 	// Create numpy array from the data 
 	anadata = (PyArrayObject*) PyArray_SimpleNewFromData(nd, npy_dims,
@@ -114,7 +119,12 @@ static PyObject *pyana_fzread(PyObject *self, PyObject *args) {
 	// See:
 	// http://www.mail-archive.com/numpy-discussion@scipy.org/msg13354.html 
 	// ([Numpy-discussion] numpy CAPI questions)
-	return Py_BuildValue("{s:N,s:{s:i,s:(ii),s:s}}", "data", anadata, "header", "size", size, "dims", ds[0], ds[1], "header", header);
+	return Py_BuildValue("{s:N,s:{s:i,s:(ii),s:s}}", 
+		"data", anadata,
+		"header",
+		"size", size,
+		"dims", ds[0], ds[1],
+		"header", header);
 }
 
 
@@ -196,7 +206,9 @@ static PyObject * pyana_fzwrite(PyObject *self, PyObject *args) {
 		PyErr_SetString(PyExc_RuntimeError, "In pyana_fzwrite: datatype requested cannot be compressed.");
 		return NULL;
 	}
-	if (debug == 1) printf("pyana_fzwrite(): pyarray datatype is %d, ana datatype is %d\n", PyArray_TYPE((PyObject *) anadata), type);
+	if (debug == 1) 
+		printf("pyana_fzwrite(): pyarray datatype is %d, ana datatype is %d\n", 
+		PyArray_TYPE((PyObject *) anadata), type);
 
 
 	// Sanitize data, make a new array from the old array and force the
