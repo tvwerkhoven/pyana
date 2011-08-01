@@ -11,7 +11,7 @@ int anadecrunch32(unsigned char *x,int32_t *array,int r9,int nx,int ny,int littl
 	 bit slice size r9 */
  {
  int  iq;
- int r0,r1,r2,r4,nb;
+ int r0=0,r1,r2,nb;
  int j,in,i,k,ix,iy, mask;
  long long	y64;
  unsigned char xq;
@@ -130,7 +130,7 @@ int anadecrunch(unsigned char *x,int16_t *array,int r9,int nx,int ny,int little_
 	bit slice size r9 */
 {
 	short iq;
-	int r0,r1,r2,r4,nb,mask;
+	int r0=0,r1,r2,r4,nb,mask;
 	int j,in,i,k,ix,iy;
 	unsigned char xq;
 	union { 
@@ -297,7 +297,7 @@ int anadecrunch8(unsigned char *x,int8_t *array,int r9,int nx,int ny,int little_
 	  bit slice size r9 */
  {
  uint8_t iq;
- int r0,r1,r2,r4,nb,mask;
+ int r0=0,r1,r2,r4,nb,mask;
  int j,in,i,k,ix,iy;
  uint8_t xq;
  union { int i; short w; unsigned char b[4]; } y;
@@ -394,7 +394,7 @@ int anadecrunchrun(unsigned char *x,int16_t *array,int r9,int nx,int ny,int litt
  /* this version handles the run length encoding used in anacrunchrun */
  {
  short iq;
- int r0,r1,r2,r3,r4,nb,mask,nrun,n,nc;
+ int r0=0,r1,r2,r4,nb,mask,nrun,n,nc;
  int j,in,i,k,iy;
  unsigned char xq;
  union { int i; short w; unsigned char b[4]; } y;
@@ -536,7 +536,7 @@ int anadecrunchrun8(unsigned char *x,int8_t *array,int r9,int nx,int ny,int litt
  /* this version handles the run length encoding used in anacrunchrun */
  {
  uint8_t iq;
- int r0,r1,r2,r3,r4,nb,mask,nrun,n,nc;
+ int r0=0,r1,r2,r4,nb,mask,nrun,n,nc;
  int j,in,i,k,iy;
  unsigned char xq;
  union { int i; short w; unsigned char b[4]; } y;

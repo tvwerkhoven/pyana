@@ -13,12 +13,12 @@ int anacrunchrun8(uint8_t *x,uint8_t *array,int slice,int nx,int ny,int limit,in
   uint8_t bits[8]={1,2,4,8,16,32,64,128};
  struct compresshead *ch;
  uint8_t	*p;
- unsigned nb,ixa,ixb;
+ unsigned nb;
  unsigned register i,j,r1;
- int	r0,r2,r3,r4,mask,fac, ii, nrun, lrun, ic;
- int	*dif, *d, nc, zq, yq, test, *dd;
- int	i2,k,ix,iy;
- unsigned	char xq;
+ int	r0,r2,r3,mask,fac, nrun, lrun, ic;
+ int	*dif, *d, nc, zq, yq, *dd;
+ int	i2,k,iy;
+
  union { int i; short w; unsigned char b[4]; } y;
  /* begin execution */
  if (limit<25) { printf("limit (%d) too small in crunchrun8\n", limit); return -1;}
@@ -187,12 +187,12 @@ int anacrunch8(uint8_t *x,uint8_t *array,int slice,int nx,int ny,int limit,int t
  {
   uint8_t bits[8]={1,2,4,8,16,32,64,128};
  struct compresshead *ch;
- short iq;
+
  unsigned nb,ixa,ixb;
  unsigned register i,j,r1,in;
  int r0,r2,r3,mask,fac;
- int i2,k,ix,iy;
- unsigned char xq;
+ int i2,k,iy;
+
  union { int i; short w; unsigned char b[4]; } y;
  /* begin execution */
  if (limit<25) { printf("limit (%d) too small in crunch8\n", limit); return -1;}
@@ -289,14 +289,14 @@ int anacrunchrun(uint8_t *x,int16_t *array,int slice,int nx,int ny,int limit,int
  {
   uint8_t bits[8]={1,2,4,8,16,32,64,128};
   struct compresshead *ch;
- short iq, *p;
- unsigned nb,ixa,ixb;
+ short *p;
+ unsigned nb;
  unsigned register i,j,r1;
- int	r0,r2,r3,r4,mask,fac, ii, nrun, lrun, ic;
- int	*dif, *d, nc, zq, yq, test, *dd;
- enum {RUN, LITERAL } state;
- int	i2,k,ix,iy;
- unsigned	char xq;
+ int	r0,r2,r3,mask,fac, nrun, lrun, ic;
+ int	*dif, *d, nc, zq, yq, *dd;
+
+ int	i2,k,iy;
+
  union { int i; short w; unsigned char b[4]; } y;
  /* begin execution */
  if (limit<25) { printf("limit (%d) too small in crunchrun\n", limit); return -1;}
@@ -469,7 +469,7 @@ int anacrunch(uint8_t *x,int16_t *array,int slice,int nx,int ny,int limit,int t_
   uint8_t bits[8]={1,2,4,8,16,32,64,128};
   unsigned register i,j,r1,in;
   int r0,r2,r3,mask,fac;
-  unsigned char xq;
+
   union{
     int i;
     short w;
@@ -614,13 +614,13 @@ int anacrunch32(uint8_t *x,int32_t *array,int slice,int nx,int ny,int limit,int 
  {
   uint8_t bits[8]={1,2,4,8,16,32,64,128};
   struct compresshead *ch;
- short iq;
+
  unsigned int nb,ixa,ixb,big=0;
  unsigned register i,j,r1,in;
- int r0,r2,r4,fac;
+ int r0,r2,fac;
  long long	r3, mask, y64;
- int i2,k,ix,iy;
- unsigned char xq;
+ int i2,k,iy;
+
  union { int i; short w; unsigned char b[4]; } y;
  union { long long l64; unsigned char b[8];  } yy;
  /* begin execution */

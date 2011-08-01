@@ -246,8 +246,8 @@ void ana_fzwrite(uint8_t *data,char *file_name,int *ds,int nd,char *header,int t
 //
   int n_elem=1,n;
   for(n=0;n<nd;++n) n_elem*=(fh.dim[n]=ds[n]);
-  int nx=fh.dim[0];
-  int ny=n_elem/nx;
+
+
   int type_sizes[]=ANA_VAR_SZ;
   int size=n_elem*type_sizes[type];
   if(t_endian){ // big endian platform
