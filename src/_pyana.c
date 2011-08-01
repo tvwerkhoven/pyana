@@ -1,11 +1,9 @@
-/* 
+/*!
 @brief A C extension for Python to read ana f0 files
-@author Tim van Werkhoven
+@author Tim van Werkhoven <t.i.m.vanwerkhoven@gmail.com>
 
 Based on Michiel van Noort's IDL DLM library 'f0' which contains a cleaned up 
 version of the original anarw routines.
-
-$Id$
 */
 
 // Headers
@@ -37,7 +35,7 @@ PyMODINIT_FUNC init_pyana(void) {
 	import_array();
 }
 
-/* 
+/*!
 @brief load an ANA f0 file data and header
 @param [in] filename
 @return [out] data, NULL on failure
@@ -120,12 +118,12 @@ static PyObject *pyana_fzread(PyObject *self, PyObject *args) {
 }
 
 
-/* 
+/*!
 @brief save an ANA format image to disk
-@param [in] filename
-@param [in] data
-@param [in] compress (optional)
-@param [in] header (optional)
+@param [in] filename Full path to write data to
+@param [in] data Data to write (numpy array)
+@param [in] compress Apply (Rice) compression or not
+@param [in] header Add a header to the file (or use default)
 @return number of bytes read on success, NULL pointer on failure
 */
 static PyObject * pyana_fzwrite(PyObject *self, PyObject *args) {
