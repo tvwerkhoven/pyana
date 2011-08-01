@@ -1,10 +1,13 @@
-/*
+/*!
+@file testrw.c -- test reading of ana file
+
 Test program to investigage memory leaks. Seems to work when we simply read a 
 file to memory and free the memory directly afterwards.
 
 Compile as:
 	gcc -g -Wall -o testrw testrw.c anarw.c anacompress.c anadecompress.c
 */
+
 #include <stdlib.h>  
 #include <stdio.h>  
 #include <stdint.h>
@@ -12,6 +15,7 @@ Compile as:
 #include "types.h"
 #include "anarw.h"
 
+const int NITER = 5;
 
 int main(int argc, char *argv[]) {
 	// Function arguments
@@ -25,7 +29,7 @@ int main(int argc, char *argv[]) {
 	
 	// Read ANA file
 	printf("testrw.c: Reading in ANA file a few times\n");
-	for (d = 0; d<5; d++) {
+	for (d = 0; d<NITER; d++) {
 		printf("iter %d\n", d);
 		anaraw = ana_fzread(filename, &ds, &nd, &header, &type, &size);
 		free(header);
